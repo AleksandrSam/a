@@ -40,6 +40,18 @@ byte month, day, hour, minute, second, hundredths; // time and date from GPS
 
 void printFloat(double f, int digits = 2); // definition for TOP-DOWN design
 
+byte raccoon[8] = 
+{
+  B10001,
+  B01110,
+  B11111,
+  B10101,
+  B01110,
+  B00100,
+  B10001,
+  B10001,
+};
+
 int count=0;
 void setup()
 {
@@ -47,6 +59,7 @@ void setup()
     ss.begin(9600);
 
     lcd.begin(16, 2);
+     lcd.createChar(1, raccoon); 
 
     showSplash(); // show splash
     time = millis();
@@ -371,10 +384,16 @@ float DistanceBetween2Points( float Lat, float Lon, float prev_Lat, float prev_L
 void showSplash() // show splash at the init
 { 
   lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("ROZUMNII ENOT");
+  
+  lcd.setCursor(0, 0); 
+  lcd.print("\1");
+
+  lcd.setCursor(2, 0);
+  lcd.print("Rozumnii enot");
+  
   lcd.setCursor(0, 1);
   lcd.print("GPS  speedometer");
+  
   delay(3000);
   lcd.clear();
 }
