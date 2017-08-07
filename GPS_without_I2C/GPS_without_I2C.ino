@@ -1,9 +1,10 @@
 #include <SoftwareSerial.h>
 #include <TinyGPS.h>
 #include <LiquidCrystal.h>
-LiquidCrystal lcd(7,6,5,4, 3, 2);
+//LiquidCrystal lcd(7,6,5,4, 3, 2);
+LiquidCrystal lcd(9,8,7,6,5,4);
 
-SoftwareSerial ss(8, 9);
+SoftwareSerial ss(2,3);
 
 TinyGPS gps;
 
@@ -38,6 +39,9 @@ byte month, day, hour, minute, second, hundredths; // time and date from GPS
 #define SCRREN_COUNT  3 // how many screens are in the system (counting starts at 0)
 #define DEBOUNCE_DELAY 25 // how mony time wait for button debounce
 
+int p = 12;
+boolean playSoundState = false;
+
 void printFloat(double f, int digits = 2); // definition for TOP-DOWN design
 
 byte raccoon[8] = 
@@ -63,6 +67,7 @@ void setup()
 
     showSplash(); // show splash
     time = millis();
+    playSound();
 }
 
 void loop()
@@ -108,13 +113,14 @@ void send_data_to_lcd(void) // update LCD witd data
        lcd.print("WARNING!");
        lcd.setCursor(4, 1);       
        lcd.print("DATA LOSS");
+       playSoundState = false;
      }
    delay(3000);
    lcd.clear(); 
    }
    else
    {
-     if (screen == 0)  // Latitude longitude speed and heading
+     if (screen == 1)  // Latitude longitude speed and heading
      {
        lcd.setCursor(0, 0);
        printLCDFloat(flat, 5);
@@ -136,7 +142,7 @@ void send_data_to_lcd(void) // update LCD witd data
        printLCDFloat(speed_kmh, 0);
        lcd.print("kmh");
      }
-     if (screen == 1)  // Distance, Average speed and maximum speed
+     if (screen == 0)  // Distance, Average speed and maximum speed
      {
        lcd.setCursor(0, 0);
        lcd.print("Speed ");
@@ -193,8 +199,13 @@ void send_data_to_lcd(void) // update LCD witd data
          lcd.print("0");
        printLCDFloat(second, 0);
      }
-    
+     if (!playSoundState)
+     {
+       playSound();
+       playSoundState = true;
+     }
    }
+
 }
 
 void printLCDFloat(double number, int digits)
@@ -398,4 +409,10 @@ void showSplash() // show splash at the init
   lcd.clear();
 }
 
+void playSound()
+{
+  tone (p, 600);
+  delay(100);
+  noTone(p); 
+}
 
