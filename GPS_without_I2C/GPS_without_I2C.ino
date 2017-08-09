@@ -44,18 +44,6 @@ boolean playSoundState = false;
 
 void printFloat(double f, int digits = 2); // definition for TOP-DOWN design
 
-byte raccoon[8] = 
-{
-  B10001,
-  B01110,
-  B11111,
-  B10101,
-  B01110,
-  B00100,
-  B10001,
-  B10001,
-};
-
 int count=0;
 void setup()
 {
@@ -63,7 +51,6 @@ void setup()
     ss.begin(9600);
 
     lcd.begin(16, 2);
-     lcd.createChar(1, raccoon); 
 
     showSplash(); // show splash
     time = millis();
@@ -392,18 +379,191 @@ float DistanceBetween2Points( float Lat, float Lon, float prev_Lat, float prev_L
   return d * EARTH_RADIUS_METERS;
 }
 
+byte raccoon[8] = 
+{
+  B10001,
+  B01110,
+  B11111,
+  B10101,
+  B01110,
+  B00100,
+  B10001,
+  B10001,
+};
+
+//================= CAR animation ==============
+byte carAnim_1[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b10000,
+  0b10000,
+  0b11000,
+  0b00000,
+  0b00000
+};
+
+byte carAnim_2[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b11100,
+  0b11100,
+  0b11110,
+  0b10000,
+  0b00000
+};
+
+byte carAnim_3[8] = {
+  0b00000,
+  0b10000,
+  0b01000,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b10100,
+  0b01000
+};
+
+byte carAnim_4[8] = {
+  0b11000,
+  0b00100,
+  0b00010,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b00101,
+  0b00010
+};
+
+byte carAnim_5[8] = {
+  0b11110,
+  0b00001,
+  0b00000,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b00001,
+  0b00000
+};
+
+byte carAnim_6[8] = {
+  0b11111,
+  0b10000,
+  0b10000,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b01000,
+  0b10000
+};
+
+byte carAnim_7[8] = {
+  0b00111,
+  0b00100,
+  0b00100,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b01010,
+  0b00100
+};
+
+byte carAnim_8[8] = {
+  0b00001,
+  0b00001,
+  0b00001,
+  0b01111,
+  0b01111,
+  0b11111,
+  0b00010,
+  0b00001
+};
+//============================================
+
 void showSplash() // show splash at the init
 { 
   lcd.clear();
   
+  //lcd.createChar(1, raccoon); 
+
+  lcd.createChar(0, carAnim_1); 
+  lcd.createChar(1, carAnim_2); 
+  lcd.createChar(2, carAnim_3); 
+  lcd.createChar(3, carAnim_4); 
+  lcd.createChar(4, carAnim_5); 
+  lcd.createChar(5, carAnim_6); 
+  lcd.createChar(6, carAnim_7); 
+  lcd.createChar(7, carAnim_8); 
+  
   lcd.setCursor(0, 0); 
   lcd.print("\1");
+//
+//  for (int j = 0; j<100; j++)
+//  {
+//  for (int i = 0; i<8; i++)
+//  { 
+//    lcd.setCursor(0, 0); 
+//    lcd.write(i);
+//    if (i>=2) 
+//    {
+//      
+//    }
+//    delay(100);
+//  }
+//  }
+
+  int chainLCD[16] = {};
+  lcd.setCursor(0, 0); 
+  delay(3000);
+  lcd.print(chainLCD[0]);
+
+  for (int i = 0; i<100; i++)
+  {
+    if (chainLCD[0] == 0)
+    {
+      // init firs chain
+      chainLCD[0]++;
+    };
+
+    for (int j=1; j<16; j++)
+    {
+      if (chainLCD[j-1] == 4)
+      {
+        chainLCD[j]++;
+      };
+    };
+    for (int j=0; j<16; j++)
+    {
+      if (chainLCD[j] > 0 && chainLCD[j] < 10)
+      {
+        lcd.setCursor(j, 1);
+        lcd.write(chainLCD[j]-1);
+        chainLCD[j]++;
+   
+        if (chainLCD[j] == 10)
+        {    
+            lcd.setCursor(j, 1);
+            lcd.print(" ");
+        };
+      };
+    };
+    delay(100);
+  }
+//  for (int j = 0; j<3; j++)
+//  {
+//
+//
+//  }
 
   lcd.setCursor(2, 0);
   lcd.print("Rozumnii enot");
   
   lcd.setCursor(0, 1);
   lcd.print("GPS  speedometer");
+
+
+  
   
   delay(3000);
   lcd.clear();
@@ -411,8 +571,8 @@ void showSplash() // show splash at the init
 
 void playSound()
 {
-  tone (p, 600);
-  delay(100);
-  noTone(p); 
+  //tone (p, 600);
+  //delay(100);
+  //noTone(p); 
 }
 
