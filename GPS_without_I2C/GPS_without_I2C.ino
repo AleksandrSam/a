@@ -39,8 +39,15 @@ byte month, day, hour, minute, second, hundredths; // time and date from GPS
 
 #define EARTH_RADIUS_METERS  6372795.0f // Earth radius, meters
 #define MINIMUM_ACCUMULATE_DISTANCE 13 // Minimum distance length to add to the overall trip
-#define SCRREN_COUNT  3 // how many screens are in the system (counting starts at 0)
-#define DEBOUNCE_DELAY 25 // how mony time wait for button debounce
+#define SCRREN_COUNT  4 // how many screens are in the system (counting starts at 0)
+#define DEBOUNCE_DELAY 0 // how mony time wait for button debounce
+
+bool start = false; // Старт замера
+long startMillis = 0; // Начало отсчета
+long currentMillis = 0; // Текущее время
+float meteringTime = 0; // Время замера
+
+float Metering[3];
 
 
 void printFloat(double f, int digits = 2); // definition for TOP-DOWN design
@@ -67,6 +74,7 @@ void loop()
   screen_switch(); // check if screen scroll button was pressed
   void_dist(); // check if distance reset button was pressed
 
+  currentMillis = millis();
   send_data_to_lcd();
   //send_data_to_serial();
   //delay(200);
@@ -74,27 +82,6 @@ void loop()
 
 void send_data_to_lcd(void) // update LCD witd data
 {
-  if (screen == 0)
-     {
-       lcd.setCursor(0, 0);
-       lcd.print("Screen_0");
-     }
-  if (screen == 1)
-     {
-       lcd.setCursor(0, 0);
-       lcd.print("Screen_1");
-     }
-     if (screen == 2)
-     {
-       lcd.setCursor(0, 0);
-       lcd.print("Screen_2");
-     }
-       if (screen == 3) 
-     {
-       lcd.setCursor(0, 0);
-       lcd.print("Screen_3");
-     }  
-  return;
  gps.f_get_position(&flat, &flon, &age);
  if ((age > 3000) || (age == TinyGPS::GPS_INVALID_AGE))
    {
@@ -198,6 +185,46 @@ void send_data_to_lcd(void) // update LCD witd data
        if (second < 10)
          lcd.print("0");
        printLCDFloat(second, 0);
+     }
+     if (screen == 3)  // Date and Time
+     {
+        if (speed_kmh > 3.2f) {
+            if (!start) {
+              start = true;
+              startMillis = millis();            
+            }
+            meteringTime = (currentMillis - startMillis) / 1000; // Время замера
+            
+            // Разгон до 30км/ч
+            if (speed_kmh >= 30) {
+              if (Metering[0] > meteringTime) {
+                 Metering[0] = meteringTime; 
+              }
+            }
+            else if (speed_kmh >= 60) {
+              if (Metering[1] > meteringTime) {
+                 Metering[1] = meteringTime; 
+              } // Разгон до 60км/ч
+            }
+            else if (speed_kmh >= 100) {
+              if (Metering[2] > meteringTime) {
+                 Metering[2] = meteringTime; 
+              } // Разгон до 100км/ч
+            }
+        }
+        if (start && speed_kmh < 3.6 ) { // Если остановились
+           start = false;
+        }
+        lcd.setCursor(0, 0);
+        printLCDFloat(speed_kmh, 0);
+        
+        lcd.setCursor(0, 1);
+        printLCDFloat(Metering[0], 3);
+        lcd.print(" s   ");
+        printLCDFloat(Metering[1], 3);
+        lcd.print(" s   ");
+        printLCDFloat(Metering[2], 3);
+        lcd.print(" s   ");
      }
      if (!playSoundState)
      {
@@ -640,12 +667,15 @@ void void_dist(void) // reset the trip when button is pressed
 {
   button_B_prev_state = button_B_state;
   button_B_state = digitalRead(button_B);
-  if (button_B_state == LOW) delay(DEBOUNCE_DELAY*30);
+  if (button_B_state == LOW) delay(DEBOUNCE_DELAY); //*30
   if ((button_B_state == LOW) && (digitalRead(button_B) == LOW) && (button_B_prev_state))
   {
-    trip = 0;
-    distance = 0;
-    lcd.clear();
+   // trip = 0;
+   // distance = 0;
+   // lcd.clear();
+      Metering[0] = 0.0;
+      Metering[1] = 0.0;
+      Metering[2] = 0.0;
   } 
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
