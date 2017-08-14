@@ -219,12 +219,12 @@ void send_data_to_lcd(void) // update LCD witd data
         printLCDFloat(speed_kmh, 0);
         
         lcd.setCursor(0, 1);
-        printLCDFloat(Metering[0], 3);
-        lcd.print(" s   ");
-        printLCDFloat(Metering[1], 3);
-        lcd.print(" s   ");
-        printLCDFloat(Metering[2], 3);
-        lcd.print(" s   ");
+        printLCDFloat(Metering[0], 2);
+        lcd.print(" ");
+        printLCDFloat(Metering[1], 2);
+        lcd.print("  ");
+        printLCDFloat(Metering[2], 2);
+        lcd.print(" ");
      }
      if (!playSoundState)
      {
