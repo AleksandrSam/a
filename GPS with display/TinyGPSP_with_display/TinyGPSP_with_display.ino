@@ -9,8 +9,8 @@
 */
 
 TinyGPS gps;
-SoftwareSerial ss(7, 8); //7-blue, 8-white
-LiquidCrystal lcd(9, 6, 5, 4, 3, 2);
+LiquidCrystal lcd(9,8,7,6,5,4);
+SoftwareSerial ss(2,3);
 
 void setup()
 {
@@ -29,12 +29,12 @@ void loop()
   unsigned long chars;
   unsigned short sentences, failed;
   // For one second we parse GPS data and report some key values
-  for (unsigned long start = millis(); millis() - start < 1000;)
+  for (unsigned long start = millis(); millis() - start < 200;)
   {
     while (ss.available())
     {
       char c = ss.read();
-      // Serial.write(c); // uncomment this line if you want to see the GPS data flowing
+       Serial.write(c); // uncomment this line if you want to see the GPS data flowing
       if (gps.encode(c)) // Did a new valid sentence come in?
         newData = true;
     }

@@ -6,6 +6,16 @@ LiquidCrystal lcd(9,8,7,6,5,4);
 
 SoftwareSerial ss(2,3);
 
+const int button_A = 10; // screen choose button
+const int button_B = 11; // dist reset button
+int button_A_state = 0;
+int button_B_state = 0;
+int button_A_prev_state = 1;
+int button_B_prev_state = 1;
+
+int p = 12;
+boolean playSoundState = false;
+
 TinyGPS gps;
 
 int incomingByte; // stores the incoming GPS serial data
@@ -19,13 +29,6 @@ byte screen = 0; // current screeen to show
 float distance = 0; // measured distance
 float trip = 0; // measured trip
 
-unsigned long time = 0;
-const unsigned long time_over = 100; // millisecond
-const int draw_screen = 5; // 5 * time_over = 0.5 sec
-const int print_serial = 10; // 10 * time_over = 1 sec
-
-int draw_screen_cont = 0;
-int print_serial_cont = 0;
 
 byte timeZone = 0; // used in hour calculation according to timezone
 
@@ -39,8 +42,6 @@ byte month, day, hour, minute, second, hundredths; // time and date from GPS
 #define SCRREN_COUNT  3 // how many screens are in the system (counting starts at 0)
 #define DEBOUNCE_DELAY 25 // how mony time wait for button debounce
 
-int p = 12;
-boolean playSoundState = false;
 
 void printFloat(double f, int digits = 2); // definition for TOP-DOWN design
 
@@ -50,39 +51,50 @@ void setup()
     Serial.begin(19200);
     ss.begin(9600);
 
+    pinMode(button_A, INPUT); // screen scroll button
+    pinMode(button_B, INPUT); // distance reset button
+
     lcd.begin(16, 2);
 
     showSplash(); // show splash
-    time = millis();
+
     playSound();
 }
 
 void loop()
 {
-
   GPS_Update();
+  screen_switch(); // check if screen scroll button was pressed
+  void_dist(); // check if distance reset button was pressed
 
-  if ( millis() > (time + time_over)) // drive the screens, feed serial with data and check the battery
-  {
-    time = millis();
-    draw_screen_cont++;
-    if (draw_screen_cont >= draw_screen)
-      {
-        draw_screen_cont = 0;
-        send_data_to_lcd();
-      }
-    print_serial_cont++;
-    if (print_serial_cont >= print_serial)
-    {  
-      print_serial_cont = 0;
-      send_data_to_serial();
-    }    
-  } 
-  
+  send_data_to_lcd();
+  //send_data_to_serial();
+  //delay(200);
 }
 
 void send_data_to_lcd(void) // update LCD witd data
 {
+  if (screen == 0)
+     {
+       lcd.setCursor(0, 0);
+       lcd.print("Screen_0");
+     }
+  if (screen == 1)
+     {
+       lcd.setCursor(0, 0);
+       lcd.print("Screen_1");
+     }
+     if (screen == 2)
+     {
+       lcd.setCursor(0, 0);
+       lcd.print("Screen_2");
+     }
+       if (screen == 3) 
+     {
+       lcd.setCursor(0, 0);
+       lcd.print("Screen_3");
+     }  
+  return;
  gps.f_get_position(&flat, &flon, &age);
  if ((age > 3000) || (age == TinyGPS::GPS_INVALID_AGE))
    {
@@ -93,6 +105,7 @@ void send_data_to_lcd(void) // update LCD witd data
        lcd.print("WARNING!");
        lcd.setCursor(0, 1);
        lcd.print("No fix detected");
+       // car go go go
      }
      else if (age > 3000)
      {
@@ -102,7 +115,7 @@ void send_data_to_lcd(void) // update LCD witd data
        lcd.print("DATA LOSS");
        playSoundState = false;
      }
-   delay(3000);
+   delay(500);
    lcd.clear(); 
    }
    else
@@ -310,17 +323,23 @@ void send_data_to_serial(void) // prints data over the serial interface
 
 void GPS_Update()
 {
-  if (ss.available() > 0)
+ bool newData = false;
+  unsigned long chars;
+  unsigned short sentences, failed;
+  // For one second we parse GPS data and report some key values
+  for (unsigned long start = millis(); millis() - start < 200;)
   {
-    char c = ss.read();
-    
-    lcd.setCursor(0,1);
-    Serial.write(c); // uncomment this line if you want to see the GPS data flowing
-   // lcd.print(c);
-    
-  //  newData = gps.encode(c);
-    if (gps.encode(c)) 
+    while (ss.available())
     {
+      char c = ss.read();
+      Serial.write(c); // uncomment this line if you want to see the GPS data flowing
+      if (gps.encode(c)) // Did a new valid sentence come in?
+        newData = true;
+    }
+  }
+
+  if (newData)
+  {
       gps.f_get_position(&flat, &flon, &age); // decode coordinates
       gps.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &age);
       // decode data, time
@@ -349,15 +368,58 @@ void GPS_Update()
       }
       
     }
+  
 
-   
-    
-//    if (speedKm.isUpdated())
+  
+//  bool newData = false;
+//  unsigned long chars;
+//  unsigned short sentences, failed;
+//  // For one second we parse GPS data and report some key values
+//  for (unsigned long start = millis(); millis() - start < 200;)
+//  {
+//    while (ss.available())
 //    {
-//      lcd.setCursor(0, 0);
-//      lcd.print(speedKm.value()); 
+//      char c = ss.read();
+//      Serial.write(c); // uncomment this line if you want to see the GPS data flowing
+//      if (gps.encode(c)) // Did a new valid sentence come in?
+//        newData = true;
 //    }
-  }
+//  }
+//
+//  if (newData)
+//  {
+//    float flat, flon;
+//    unsigned long age;
+//    gps.f_get_position(&flat, &flon, &age);
+//    Serial.print("LAT=");
+//    lcd.setCursor(0, 0);
+//    lcd.print (flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6);
+//    lcd.setCursor(0, 1);
+//    lcd.print (flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6);
+//    lcd.print("111");
+//    Serial.print(flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6);
+//    Serial.print(" LON=");
+//    Serial.print(flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6);
+//    Serial.print(" SAT=");
+//    Serial.print(gps.satellites() == TinyGPS::GPS_INVALID_SATELLITES ? 0 : gps.satellites());
+//    Serial.print(" PREC=");
+//    Serial.print(gps.hdop() == TinyGPS::GPS_INVALID_HDOP ? 0 : gps.hdop());
+//  }else {
+//    lcd.setCursor(0, 0);
+//    lcd.print("Waiting data"); 
+//    lcd.setCursor(0, 1);
+//    lcd.print("from GPS");
+//  }
+//  
+//  gps.stats(&chars, &sentences, &failed);
+//  Serial.print(" CHARS=");
+//  Serial.print(chars);
+//  Serial.print(" SENTENCES=");
+//  Serial.print(sentences);
+//  Serial.print(" CSUM ERR=");
+//  Serial.println(failed);
+//  if (chars == 0)
+//    Serial.println("** No characters received from GPS: check wiring **");
 
 }
 
@@ -498,63 +560,46 @@ void showSplash() // show splash at the init
   
   lcd.setCursor(0, 0); 
   lcd.print("\1");
-//
-//  for (int j = 0; j<100; j++)
-//  {
-//  for (int i = 0; i<8; i++)
-//  { 
-//    lcd.setCursor(0, 0); 
-//    lcd.write(i);
-//    if (i>=2) 
-//    {
-//      
-//    }
-//    delay(100);
-//  }
-//  }
+
 
   int chainLCD[16] = {};
   lcd.setCursor(0, 0); 
   delay(3000);
   lcd.print(chainLCD[0]);
-
-  for (int i = 0; i<100; i++)
-  {
-    if (chainLCD[0] == 0)
-    {
-      // init firs chain
-      chainLCD[0]++;
-    };
-
-    for (int j=1; j<16; j++)
-    {
-      if (chainLCD[j-1] == 4)
-      {
-        chainLCD[j]++;
-      };
-    };
-    for (int j=0; j<16; j++)
-    {
-      if (chainLCD[j] > 0 && chainLCD[j] < 10)
-      {
-        lcd.setCursor(j, 1);
-        lcd.write(chainLCD[j]-1);
-        chainLCD[j]++;
-   
-        if (chainLCD[j] == 10)
-        {    
-            lcd.setCursor(j, 1);
-            lcd.print(" ");
-        };
-      };
-    };
-    delay(100);
-  }
-//  for (int j = 0; j<3; j++)
+//
+//  for (int i = 0; i<100; i++)
 //  {
+//    if (chainLCD[0] == 0)
+//    {
+//      // init firs chain
+//      chainLCD[0]++;
+//    };
 //
-//
+//    for (int j=1; j<16; j++)
+//    {
+//      if (chainLCD[j-1] == 4)
+//      {
+//        chainLCD[j]++;
+//      };
+//    };
+//    for (int j=0; j<16; j++)
+//    {
+//      if (chainLCD[j] > 0 && chainLCD[j] < 10)
+//      {
+//        lcd.setCursor(j, 1);
+//        lcd.print(chainLCD[j]-1);
+//        chainLCD[j]++;
+//   
+//        if (chainLCD[j] == 10)
+//        {    
+//            lcd.setCursor(j, 1);
+//            lcd.print(" ");
+//        };
+//      };
+//    };
+//    delay(100);
 //  }
+
 
   lcd.setCursor(2, 0);
   lcd.print("Rozumnii enot");
@@ -576,3 +621,31 @@ void playSound()
   //noTone(p); 
 }
 
+
+void screen_switch(void) // switch the screen when button is pressed
+{
+  button_A_prev_state = button_A_state;
+  button_A_state = digitalRead(button_A);
+  if (button_A_state == LOW) delay(DEBOUNCE_DELAY);
+  if ((button_A_state == LOW) && (digitalRead(button_A) == LOW) && (button_A_prev_state))
+  {
+    screen++;
+    lcd.clear();
+  } 
+  if (screen > SCRREN_COUNT) screen = 0;
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+void void_dist(void) // reset the trip when button is pressed
+{
+  button_B_prev_state = button_B_state;
+  button_B_state = digitalRead(button_B);
+  if (button_B_state == LOW) delay(DEBOUNCE_DELAY*30);
+  if ((button_B_state == LOW) && (digitalRead(button_B) == LOW) && (button_B_prev_state))
+  {
+    trip = 0;
+    distance = 0;
+    lcd.clear();
+  } 
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
