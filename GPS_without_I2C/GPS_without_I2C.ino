@@ -39,7 +39,7 @@ byte month, day, hour, minute, second, hundredths; // time and date from GPS
 
 #define EARTH_RADIUS_METERS  6372795.0f // Earth radius, meters
 #define MINIMUM_ACCUMULATE_DISTANCE 13 // Minimum distance length to add to the overall trip
-#define SCRREN_COUNT  4 // how many screens are in the system (counting starts at 0)
+#define SCRREN_COUNT  3 // how many screens are in the system (counting starts at 0)
 #define DEBOUNCE_DELAY 0 // how mony time wait for button debounce
 
 bool start = false; // Старт замера
