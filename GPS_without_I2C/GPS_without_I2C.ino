@@ -30,7 +30,7 @@ float distance = 0; // measured distance
 float trip = 0; // measured trip
 
 
-byte timeZone = 0; // used in hour calculation according to timezone
+byte timeZone = 3; // used in hour calculation according to timezone
 
 float flat, flon, prev_flat, prev_flon; // current and previous coordinates
 unsigned long age; // age of GPS coordinates, ms
@@ -49,8 +49,9 @@ float meteringTime = 0; // Время замера
 
 bool isMetricStart = false;
 
-float Metering[3];
-
+float Metering_0 = 0;
+float Metering_1 = 0;
+float Metering_2 = 0;
 
 void printFloat(double f, int digits = 2); // definition for TOP-DOWN design
 
@@ -76,7 +77,6 @@ void loop()
   screen_switch(); // check if screen scroll button was pressed
   void_dist(); // check if distance reset button was pressed
 
-  currentMillis = millis();
   send_data_to_lcd();
   //send_data_to_serial();
   //delay(200);
@@ -94,6 +94,7 @@ void send_data_to_lcd(void) // update LCD witd data
        lcd.print("WARNING!");
        lcd.setCursor(0, 1);
        lcd.print("No fix detected");
+        playSoundState = false;
        // car go go go
      }
      else if (age > 3000)
@@ -102,7 +103,7 @@ void send_data_to_lcd(void) // update LCD witd data
        lcd.print("WARNING!");
        lcd.setCursor(4, 1);       
        lcd.print("DATA LOSS");
-       playSoundState = false;
+      
      }
    delay(500);
    lcd.clear(); 
@@ -134,13 +135,14 @@ void send_data_to_lcd(void) // update LCD witd data
      if (screen == 0)  // Distance, Average speed and maximum speed
      {
        lcd.setCursor(0, 0);
-       lcd.print("Speed ");
+      // lcd.print("Speed ");
        printLCDFloat(speed_kmh, 0);
-       lcd.print(" km/h   ");
+       lcd.print("  ");
+      // lcd.print(" km/h   ");
        lcd.setCursor(0, 1);
-       lcd.print("Dist ");
+       //lcd.print("Dist ");
        printLCDFloat(trip/1000, 3);
-       lcd.print(" km   ");
+       //lcd.print(" km   ");
      }
      if (screen == 2)  // Date and Time
      {
@@ -154,12 +156,12 @@ void send_data_to_lcd(void) // update LCD witd data
        if (ihour > 23)
        {
          ihour = ihour - 24;
-         day = day - 1;
+         day = day + 1;
        }
        if (ihour < 0)
        {
          ihour = ihour + 24;
-         day = day - 1;
+         day = day + 1;
        }
        
        lcd.setCursor(0, 0);
@@ -193,25 +195,25 @@ void send_data_to_lcd(void) // update LCD witd data
         if (speed_kmh > 3.6) {
             if (!start) {
               start = true;
-              startMillis = millis();            
+              startMillis = millis();     
             }
-            meteringTime = (currentMillis - startMillis) / 1000; // Время замера
+            currentMillis = millis();
+            meteringTime = (currentMillis - startMillis) / 1000.0; // Время замера
+            Serial.println(meteringTime);
             
+           // Serial.println(startMillis);
             // Разгон до 30км/ч
-            if (speed_kmh >= 30) {
-              if (Metering[0] > meteringTime) {
-                 Metering[0] = meteringTime; 
-              }
+            if (Metering_0 == 0.0 && speed_kmh >= 30) {
+                 Metering_0 = meteringTime; 
             }
-            else if (speed_kmh >= 60) {
-              if (Metering[1] > meteringTime) {
-                 Metering[1] = meteringTime; 
-              } // Разгон до 60км/ч
+            else if (Metering_1 == 0.0 && speed_kmh >= 60) {
+             
+                 Metering_1 = meteringTime; 
+               // Разгон до 60км/ч
             }
-            else if (speed_kmh >= 100) {
-              if (Metering[2] > meteringTime) {
-                 Metering[2] = meteringTime; 
-              } // Разгон до 100км/ч
+            else if (Metering_2 == 0.0 && speed_kmh >= 100) {
+                 Metering_2 = meteringTime; 
+               // Разгон до 100км/ч
             }
         }
         if (start && speed_kmh < 3.6 ) { // Если остановились
@@ -219,19 +221,19 @@ void send_data_to_lcd(void) // update LCD witd data
         }
         lcd.setCursor(0, 0);
         printLCDFloat(speed_kmh, 0);
-        
-        lcd.setCursor(0, 1);
-        printLCDFloat(Metering[0], 2);
-        lcd.print(" ");
-        printLCDFloat(Metering[1], 2);
         lcd.print("  ");
-        printLCDFloat(Metering[2], 2);
+        lcd.setCursor(0, 1);
+        printLCDFloat(Metering_0, 1);
+        lcd.print(" ");
+        printLCDFloat(Metering_1, 1);
+        lcd.print(" ");
+        printLCDFloat(Metering_2, 1);
         lcd.print(" ");
 
         lcd.setCursor(5, 0);
         printLCDFloat(meteringTime, 2);
          
-        lcd.setCursor(10, 0);
+        lcd.setCursor(11, 0);
         if (start) {
            lcd.print("start");
         }else{
@@ -598,47 +600,47 @@ void showSplash() // show splash at the init
   lcd.createChar(6, carAnim_7); 
   lcd.createChar(7, carAnim_8); 
   
-  lcd.setCursor(0, 0); 
-  lcd.print("\1");
+//  lcd.setCursor(0, 0); 
+//  lcd.print("\1");
 
 
   int chainLCD[16] = {};
-  lcd.setCursor(0, 0); 
-  delay(3000);
-  lcd.print(chainLCD[0]);
-//
-//  for (int i = 0; i<100; i++)
-//  {
-//    if (chainLCD[0] == 0)
-//    {
-//      // init firs chain
-//      chainLCD[0]++;
-//    };
-//
-//    for (int j=1; j<16; j++)
-//    {
-//      if (chainLCD[j-1] == 4)
-//      {
-//        chainLCD[j]++;
-//      };
-//    };
-//    for (int j=0; j<16; j++)
-//    {
-//      if (chainLCD[j] > 0 && chainLCD[j] < 10)
-//      {
-//        lcd.setCursor(j, 1);
-//        lcd.print(chainLCD[j]-1);
-//        chainLCD[j]++;
-//   
-//        if (chainLCD[j] == 10)
-//        {    
-//            lcd.setCursor(j, 1);
-//            lcd.print(" ");
-//        };
-//      };
-//    };
-//    delay(100);
-//  }
+//  lcd.setCursor(0, 0); 
+//  delay(3000);
+//  lcd.print(chainLCD[0]);
+
+  for (int i = 0; i<100; i++)
+  {
+    if (chainLCD[0] == 0)
+    {
+      // init firs chain
+      chainLCD[0]++;
+    };
+
+    for (int j=1; j<16; j++)
+    {
+      if (chainLCD[j-1] == 4)
+      {
+        chainLCD[j]++;
+      };
+    };
+    for (int j=0; j<16; j++)
+    {
+      if (chainLCD[j] > 0 && chainLCD[j] < 10)
+      {
+        lcd.setCursor(j, 1);
+        lcd.write(chainLCD[j]-1);
+        chainLCD[j]++;
+   
+        if (chainLCD[j] == 10)
+        {    
+            lcd.setCursor(j, 1);
+            lcd.print(" ");
+        };
+      };
+    };
+    delay(100);
+  }
 
 
   lcd.setCursor(2, 0);
@@ -656,9 +658,9 @@ void showSplash() // show splash at the init
 
 void playSound()
 {
-  //tone (p, 600);
-  //delay(100);
-  //noTone(p); 
+  tone (p, 600);
+  delay(100);
+  noTone(p); 
 }
 
 
@@ -686,9 +688,9 @@ void void_dist(void) // reset the trip when button is pressed
    // trip = 0;
    // distance = 0;
    // lcd.clear();
-      Metering[0] = 0.0;
-      Metering[1] = 0.0;
-      Metering[2] = 0.0;
+      Metering_0 = 0.0;
+      Metering_1 = 0.0;
+      Metering_2 = 0.0;
       start = false;
   } 
 }
