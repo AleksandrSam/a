@@ -53,7 +53,11 @@ float Metering_0 = 0;
 float Metering_1 = 0;
 float Metering_2 = 0;
 
+int chainLCD[16] = {};
+
 void printFloat(double f, int digits = 2); // definition for TOP-DOWN design
+
+int carCadr = 0;
 
 int count=0;
 void setup()
@@ -82,22 +86,8 @@ void loop()
   //delay(200);
 }
 
-void send_data_to_lcd(void) // update LCD witd data
+void carAnimation(void) // update LCD witd data
 {
- gps.f_get_position(&flat, &flon, &age);
- if ((age > 3000) || (age == TinyGPS::GPS_INVALID_AGE))
-   {
-     lcd.clear();
-     if (age == TinyGPS::GPS_INVALID_AGE)
-     {
-       lcd.setCursor(4, 0);
-       lcd.print("Loading!");
-        playSoundState = false;
-
-        int chainLCD[16] = {};
-
-  for (int i = 0; i<55; i++)
-  {
     if (chainLCD[0] == 0)
     {
       // init firs chain
@@ -126,11 +116,25 @@ void send_data_to_lcd(void) // update LCD witd data
         };
       };
     };
-    delay(200);
-    
-    GPS_Update();
-  }
-
+    carCadr++;
+    if (carCadr>55){
+      chainLCD[0] = 0; chainLCD[1] = 0; chainLCD[2] = 0; chainLCD[3] = 0; chainLCD[4] = 0; chainLCD[5] = 0; chainLCD[6] = 0; chainLCD[7] = 0; chainLCD[8] = 0; chainLCD[9] = 0;
+      chainLCD[10] = 0; chainLCD[11] = 0; chainLCD[12] = 0; chainLCD[13] = 0; chainLCD[14] = 0; chainLCD[15] = 0;
+      carCadr = 0;
+    }
+}
+void send_data_to_lcd(void) // update LCD witd data
+{
+ gps.f_get_position(&flat, &flon, &age);
+ if ((age > 3000) || (age == TinyGPS::GPS_INVALID_AGE))
+   {
+     lcd.clear();
+     if (age == TinyGPS::GPS_INVALID_AGE)
+     {
+       lcd.setCursor(4, 0);
+       lcd.print("Loading!");
+       playSoundState = false;
+       carAnimation();
        // car go go go
      }
      else if (age > 3000)
@@ -142,7 +146,6 @@ void send_data_to_lcd(void) // update LCD witd data
       
      }
    delay(500);
-   lcd.clear(); 
    }
    else
    {
