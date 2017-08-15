@@ -47,6 +47,8 @@ long startMillis = 0; // Начало отсчета
 long currentMillis = 0; // Текущее время
 float meteringTime = 0; // Время замера
 
+bool isMetricStart = false;
+
 float Metering[3];
 
 
@@ -188,7 +190,7 @@ void send_data_to_lcd(void) // update LCD witd data
      }
      if (screen == 3)  // Date and Time
      {
-        if (speed_kmh > 3.2f) {
+        if (speed_kmh > 3.6) {
             if (!start) {
               start = true;
               startMillis = millis();            
@@ -225,6 +227,17 @@ void send_data_to_lcd(void) // update LCD witd data
         lcd.print("  ");
         printLCDFloat(Metering[2], 2);
         lcd.print(" ");
+
+        lcd.setCursor(10, 1);
+        printLCDFloat(meteringTime, 2);
+         
+        lcd.setCursor(10, 1);
+        if (start) {
+           lcd.print("start");
+        }else{
+           lcd.print("stop");
+        }
+              
      }
      if (!playSoundState)
      {
@@ -676,6 +689,7 @@ void void_dist(void) // reset the trip when button is pressed
       Metering[0] = 0.0;
       Metering[1] = 0.0;
       Metering[2] = 0.0;
+      start = false;
   } 
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
