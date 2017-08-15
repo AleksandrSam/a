@@ -134,7 +134,7 @@ void send_data_to_lcd(void) // update LCD witd data
        lcd.setCursor(4, 0);
        lcd.print("Loading!");
        playSoundState = false;
-       carAnimation();
+      // carAnimation();
        // car go go go
      }
      else if (age > 3000)
