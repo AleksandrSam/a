@@ -228,10 +228,10 @@ void send_data_to_lcd(void) // update LCD witd data
         printLCDFloat(Metering[2], 2);
         lcd.print(" ");
 
-        lcd.setCursor(10, 1);
+        lcd.setCursor(5, 0);
         printLCDFloat(meteringTime, 2);
          
-        lcd.setCursor(10, 1);
+        lcd.setCursor(10, 0);
         if (start) {
            lcd.print("start");
         }else{
