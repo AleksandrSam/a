@@ -69,10 +69,10 @@ void setup()
     pinMode(button_B, INPUT); // distance reset button
 
     lcd.begin(16, 2);
+    playSound();
 
     showSplash(); // show splash
 
-    playSound();
 }
 
 void loop()
@@ -138,12 +138,14 @@ void send_data_to_lcd(void) // update LCD witd data
        // car go go go
      }
      else if (age > 3000)
-     {
+     {  
+       lcd.clear();
        lcd.setCursor(4, 0);
-       lcd.print("WARNING!");
-       lcd.setCursor(4, 1);       
        lcd.print("DATA LOSS");
-      
+       carAnimation();
+       //lcd.setCursor(4, 1);       
+       //lcd.print("DATA LOSS");
+       //playSoundState = false;
      }
    delay(200);
    //lcd.clear();
@@ -638,15 +640,13 @@ void showSplash() // show splash at the init
   lcd.createChar(4, carAnim_5); 
   lcd.createChar(5, carAnim_6); 
   lcd.createChar(6, carAnim_7); 
-  lcd.createChar(7, carAnim_8); 
-
- 
+  lcd.createChar(7, carAnim_8);  
 
   lcd.setCursor(0, 0);
-  lcd.print("Rozumnii enot");
+  lcd.print("GPS  speedometer");
   
   lcd.setCursor(0, 1);
-  lcd.print("GPS  speedometer");
+  lcd.print("Rozumnii enot");
   
   delay(3000);
   lcd.clear();
@@ -654,6 +654,7 @@ void showSplash() // show splash at the init
 
 void playSound()
 {
+  lcd.clear();
 //  tone (p, 600);
 //  delay(100);
 //  noTone(p); 
