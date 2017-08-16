@@ -88,40 +88,40 @@ void loop()
 
 void carAnimation(void) // update LCD witd data
 {
-//    if (chainLCD[0] == 0)
-//    {
-//      // init firs chain
-//      chainLCD[0]++;
-//    };
-//
-//    for (int j=1; j<16; j++)
-//    {
-//      if (chainLCD[j-1] == 4)
-//      {
-//        chainLCD[j]++;
-//      };
-//    };
-//    for (int j=0; j<16; j++)
-//    {
-//      if (chainLCD[j] > 0 && chainLCD[j] < 10)
-//      {
-//        lcd.setCursor(j, 1);
-//        lcd.write(chainLCD[j]-1);
-//        chainLCD[j]++;
-//   
-//        if (chainLCD[j] == 10)
-//        {    
-//            lcd.setCursor(j, 1);
-//            lcd.print(" ");
-//        };
-//      };
-//    };
-//    carCadr++;
-//    if (carCadr>55){
-//      chainLCD[0] = 0; chainLCD[1] = 0; chainLCD[2] = 0; chainLCD[3] = 0; chainLCD[4] = 0; chainLCD[5] = 0; chainLCD[6] = 0; chainLCD[7] = 0; chainLCD[8] = 0; chainLCD[9] = 0;
-//      chainLCD[10] = 0; chainLCD[11] = 0; chainLCD[12] = 0; chainLCD[13] = 0; chainLCD[14] = 0; chainLCD[15] = 0;
-//      carCadr = 0;
-//    }
+    if (chainLCD[0] == 0)
+    {
+      // init firs chain
+      chainLCD[0]++;
+    };
+
+    for (int j=1; j<16; j++)
+    {
+      if (chainLCD[j-1] == 4)
+      {
+        chainLCD[j]++;
+      };
+    };
+    for (int j=0; j<16; j++)
+    {
+      if (chainLCD[j] > 0 && chainLCD[j] < 10)
+      {
+        lcd.setCursor(j, 1);
+        lcd.write(chainLCD[j]-1);
+        chainLCD[j]++;
+   
+        if (chainLCD[j] == 10)
+        {    
+            lcd.setCursor(j, 1);
+            lcd.print(" ");
+        };
+      };
+    };
+    carCadr++;
+    if (carCadr>55){
+      chainLCD[0] = 0; chainLCD[1] = 0; chainLCD[2] = 0; chainLCD[3] = 0; chainLCD[4] = 0; chainLCD[5] = 0; chainLCD[6] = 0; chainLCD[7] = 0; chainLCD[8] = 0; chainLCD[9] = 0;
+      chainLCD[10] = 0; chainLCD[11] = 0; chainLCD[12] = 0; chainLCD[13] = 0; chainLCD[14] = 0; chainLCD[15] = 0;
+      carCadr = 0;
+    }
 }
 void send_data_to_lcd(void) // update LCD witd data
 {
@@ -134,7 +134,7 @@ void send_data_to_lcd(void) // update LCD witd data
        lcd.setCursor(4, 0);
        lcd.print("Loading!");
        playSoundState = false;
-      // carAnimation();
+       carAnimation();
        // car go go go
      }
      else if (age > 3000)
@@ -146,7 +146,7 @@ void send_data_to_lcd(void) // update LCD witd data
       
      }
    delay(200);
-   lcd.clear();
+   //lcd.clear();
    }
    else
    {
@@ -631,14 +631,14 @@ void showSplash() // show splash at the init
   
   //lcd.createChar(1, raccoon); 
 
-//  lcd.createChar(0, carAnim_1); 
-//  lcd.createChar(1, carAnim_2); 
-//  lcd.createChar(2, carAnim_3); 
-//  lcd.createChar(3, carAnim_4); 
-//  lcd.createChar(4, carAnim_5); 
-//  lcd.createChar(5, carAnim_6); 
-//  lcd.createChar(6, carAnim_7); 
-//  lcd.createChar(7, carAnim_8); 
+  lcd.createChar(0, carAnim_1); 
+  lcd.createChar(1, carAnim_2); 
+  lcd.createChar(2, carAnim_3); 
+  lcd.createChar(3, carAnim_4); 
+  lcd.createChar(4, carAnim_5); 
+  lcd.createChar(5, carAnim_6); 
+  lcd.createChar(6, carAnim_7); 
+  lcd.createChar(7, carAnim_8); 
 
  
 
@@ -654,9 +654,9 @@ void showSplash() // show splash at the init
 
 void playSound()
 {
-  tone (p, 600);
-  delay(100);
-  noTone(p); 
+//  tone (p, 600);
+//  delay(100);
+//  noTone(p); 
 }
 
 
