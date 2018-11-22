@@ -9,6 +9,8 @@
 #include <Wire.h>
 
 void setup() {
+      pinMode(1, FUNCTION_3);
+    pinMode(3, FUNCTION_3);
   Serial.begin(115200);
   while (!Serial);             // Leonardo: wait for serial monitor
   Serial.println("\n\nI2C Scanner to scan for devices on each port pair D0 to D7");
